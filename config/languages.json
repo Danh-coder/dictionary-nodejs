@@ -1,0 +1,42 @@
+[
+  {
+    "name": "English",
+    "key": "english",
+    "imageUrl": "/images/english.png"
+  },
+  {
+    "name": "German",
+    "key": "german",
+    "imageUrl": "/images/german.png"
+  },
+  {
+    "name": "French",
+    "key": "french",
+    "imageUrl": "/images/french.png"
+  },
+  {
+    "name": "Thai",
+    "key": "thai",
+    "imageUrl": "/images/thai.png"
+  },
+  {
+    "name": "Spanish",
+    "key": "spanish",
+    "imageUrl": "/images/spanish.png"
+  },
+  {
+    "name": "Chinese",
+    "key": "chinese",
+    "imageUrl": "/images/uploads/china.png"
+  },
+  {
+    "name": "Vietnamese",
+    "key": "vietnamese",
+    "imageUrl": "/images/uploads/vietnam.png"
+  },
+  {
+    "name": "Japanese",
+    "key": "japanese",
+    "imageUrl": "/images/uploads/japan.png"
+  }
+]

@@ -1,0 +1,150 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  /* background-color: #f5f5f5; */
+  background-color: white;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  margin: auto;
+  padding: 20px;
+  width: 800px;
+  /* background-color: white; */
+  border-radius: 8px;
+  /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table,
+th,
+td {
+  border: 1px solid #ddd;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+a {
+  text-decoration: none;
+  margin: auto
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.pagination button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0 0.25rem;
+}
+
+.pagination button.active {
+  background-color: #0056b3;
+}
+
+.pagination button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.sort-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.sort-arrow {
+  margin-left: 5px;
+  transition: transform 0.3s ease;
+}
+
+.sort-arrow.desc {
+  transform: rotate(180deg);
+}
+
+.pagination button.active {
+  font-weight: bold;
+  background-color: #ddd;
+}
+
+/* Container for the search bar, dropdown, and button */
+.search-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Styling the search bar */
+.search-bar {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+  flex: 1;
+}
+
+/* Styling the dropdown menu */
+.search-dropdown {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+/* Styling the search button */
+.search-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 10px; /* Add margin to the right for spacing */
+}
+
+/* Styling the export button */
+.export-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Change background color on hover */
+.search-button:hover{
+  background-color: #0056b3;
+}
+
+.export-button:hover {
+  background-color: #45a049;
+}

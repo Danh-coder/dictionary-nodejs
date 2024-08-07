@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Word</title>
+    <link rel="stylesheet" href="/stylesheets/addnew.css">
+    <link rel="stylesheet" href="/stylesheets/navbar.css">
+    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div id="app">
+        <navbar current-page="new"></navbar>
+        <!-- <div class="navbar">
+            <ul>
+                <li><a href="#" class="active"><i class="fa-regular fa-comment"></i>Words</a></li>
+                <li><a href="#"><i class="fa-solid fa-circle-plus"></i>New</a></li>
+                <li><a href="#"><i class="fa-solid fa-graduation-cap"></i>Test</a></li>
+                <li><a href="#"><i class="fa-solid fa-circle-user"></i>Me</a></li>
+            </ul>
+        </div> -->
+
+        <!-- Body content here -->
+        <div class="form-container">
+            <h2>New Word</h2>
+            <p class="error-message">{{errorMessage}}</p>
+            <form id="new-word-form">
+                <div class="form-group" v-for="language in languages">
+                    <label :for="language.key + '-word'">
+                        <img :src="language.imageUrl" :alt="language.name"> {{language.name}}
+                    </label>
+                    <input type="text" :id="language.key + '-word'" :name="language.key + '-word'"
+                        v-model="word[language.key]" :placeholder="'Enter ' + language.name + ' word'" required>
+                </div>
+                <!-- <div class="form-group">
+                    <label for="english-word">
+                        <img src="/images/english.png" alt="English"> English
+                    </label>
+                    <input type="text" id="english-word" name="english-word" v-model="english"
+                        placeholder="Enter English word" required>
+                </div>
+                <div class="form-group">
+                    <label for="german-word">
+                        <img src="/images/german.png" alt="German"> German
+                    </label>
+                    <input type="text" id="german-word" name="german-word" v-model="german"
+                        placeholder="Enter German word" required>
+                </div>
+                <div class="form-group">
+                    <label for="french-word">
+                        <img src="/images/french.png" alt="French"> French
+                    </label>
+                    <input type="text" id="french-word" name="french-word" v-model="french"
+                        placeholder="Enter French word" required>
+                </div>
+                <div class="form-group">
+                    <label for="vietnamese-word">
+                        <img src="/images/vietnamese.png" alt="Vietnamese"> Vietnamese
+                    </label>
+                    <input type="text" id="vietnamese-word" name="vietnamese-word" v-model="vietnamese"
+                        placeholder="Enter Vietnamese word" required>
+                </div> -->
+                <div class="button-group">
+                    <button type="submit" class="btn-submit" @click.prevent="addNewWord">Submit</button>
+                    <button type="button" class="btn-translate" @click="translateAll">Translate all</button>
+                </div>
+            </form>
+            <hr>
+            <h2>Upload CSV</h2>
+            <form id="upload-csv-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="csv-file">Upload CSV</label>
+                    <input type="file" id="csv-file" name="csv-file" @change="onFileChange" accept=".csv">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-submit" @click.prevent="addNewWordCSV">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/javascripts/navbar.js"></script>
+    <script src="/javascripts/script.js"></script>
+</body>
+
+</html>

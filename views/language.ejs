@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Language</title>
+    <link rel="stylesheet" href="/stylesheets/addnew.css">
+    <link rel="stylesheet" href="/stylesheets/navbar.css">
+    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="app">
+        <navbar current-page="add-language"></navbar>
+
+        <!-- Body content here -->
+        <div class="form-container">
+            <h2>Add a New Language</h2>
+            <p class="error-message">{{errorMessage}}</p>
+            <form class="" @submit.prevent="addLanguage">
+                <div class="form-group">
+                    <label for="language-name">Language</label>
+                    <input type="text" id="language-name" v-model="newLanguage.name" required>
+                </div>
+                <div class="form-group">
+                    <label for="language-image">Flag Image</label>
+                    <input type="file" id="language-image" @change="handleFileUpload">
+                </div>
+                <div class="button-group">
+                    <button type="submit" class="btn-submit" @click.prevent="addLanguage">Submit</button>
+                </div>
+            </form>
+            
+            <h2>Current Languages</h2>
+            <ul class="language-list">
+                <li v-for="language in languages" :key="language.key">
+                    <img :src="language.imageUrl" :alt="language.name"> {{language.name}}
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/javascripts/navbar.js"></script>
+    <script src="/javascripts/script.js"></script>
+</body>
+</html>
