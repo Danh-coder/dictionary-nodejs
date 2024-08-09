@@ -5,9 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Word</title>
+    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+    <!-- Local stylesheets -->
     <link rel="stylesheet" href="/stylesheets/addnew.css">
     <link rel="stylesheet" href="/stylesheets/navbar.css">
-    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -23,7 +27,8 @@
         </div> -->
 
         <!-- Body content here -->
-        <div class="form-container">
+        <!-- Old way -->
+        <!-- <div class="form-container">
             <h2>New Word</h2>
             <p class="error-message">{{errorMessage}}</p>
             <form id="new-word-form">
@@ -34,34 +39,6 @@
                     <input type="text" :id="language.key + '-word'" :name="language.key + '-word'"
                         v-model="word[language.key]" :placeholder="'Enter ' + language.name + ' word'" required>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="english-word">
-                        <img src="/images/english.png" alt="English"> English
-                    </label>
-                    <input type="text" id="english-word" name="english-word" v-model="english"
-                        placeholder="Enter English word" required>
-                </div>
-                <div class="form-group">
-                    <label for="german-word">
-                        <img src="/images/german.png" alt="German"> German
-                    </label>
-                    <input type="text" id="german-word" name="german-word" v-model="german"
-                        placeholder="Enter German word" required>
-                </div>
-                <div class="form-group">
-                    <label for="french-word">
-                        <img src="/images/french.png" alt="French"> French
-                    </label>
-                    <input type="text" id="french-word" name="french-word" v-model="french"
-                        placeholder="Enter French word" required>
-                </div>
-                <div class="form-group">
-                    <label for="vietnamese-word">
-                        <img src="/images/vietnamese.png" alt="Vietnamese"> Vietnamese
-                    </label>
-                    <input type="text" id="vietnamese-word" name="vietnamese-word" v-model="vietnamese"
-                        placeholder="Enter Vietnamese word" required>
-                </div> -->
                 <div class="button-group">
                     <button type="submit" class="btn-submit" @click.prevent="addNewWord">Submit</button>
                     <button type="button" class="btn-translate" @click="translateAll">Translate all</button>
@@ -78,11 +55,53 @@
                     <button type="submit" class="btn-submit" @click.prevent="addNewWordCSV">Upload</button>
                 </div>
             </form>
+        </div> -->
+
+        <div class="container form-container">
+            <div class="row">
+                <div class="col-md-6 form-column">
+                    <h2 class="text-center form-header">New Word</h2>
+                    <p class="form-info text-center">Please enter the words in different languages in the fields below.
+                        You can also use the "Translate all" button to automatically translate all entered words.</p>
+                    <form>
+                        <div class="form-group d-flex align-items-center" v-for="language in languages">
+                            <img :src="language.imageUrl" :alt="language.name">
+                            <input type="text" class="form-control" :id="language.key + '-word'"
+                                :name="language.key + '-word'" v-model="word[language.key]"
+                                :placeholder="'Enter ' + language.name + ' word'" required>
+                        </div>
+                        <div class="btn-group">
+                            <button type="submit" class="btn btn-success" @click.prevent="addNewWord">Submit</button>
+                            <button type="button" class="btn btn-primary" @click="translateAll">Translate all</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6 form-column">
+                    <h2 class="text-center form-header">Import CSV</h2>
+                    <p class="form-info text-center">Use this form to upload a CSV file containing the words you want to
+                        add to the system. Make sure the file is in the correct format.</p>
+                    <form>
+                        <div class="form-group file-upload">
+                            <label for="csv-file">Upload CSV</label>
+                            <input type="file" class="form-control-file ml-3" name="csv-file" @change="onFileChange" id="csv-file" accept=".csv">
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block" @click.prevent="addNewWordCSV">Upload</button>
+                    </form>
+                </div>
+            </div>
         </div>
+
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="/javascripts/navbar.js"></script>
+    <script src="/javascripts/alert.js"></script>
     <script src="/javascripts/script.js"></script>
 </body>
 

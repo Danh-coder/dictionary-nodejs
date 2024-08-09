@@ -1,8 +1,14 @@
 // script.js
-new Vue({
+// Uncomment to debug
+// Swal.fire("SweetAlert2 is working!"); // A pretty-styled alert
+
+const app = new Vue({
     el: '#app',
     data: {
         domain: 'http://localhost:3000/words/',
+        dataTable: null,
+        languagesWithFlags: [],
+        selectedLanguage: null,
         languages: [],
         words: [],
         currentPage: 1, // init value
@@ -12,18 +18,10 @@ new Vue({
         sortKey: '',
         csv: null,
         word: {},
-        // german: '',
-        // english: '',
-        // french: '',
-        // vietnamese: '',
         errorMessage: '',
         id: '',
         searchQuery: '', // Add this line
         searchLanguage: '', // Add this line
-        newLanguage: {
-            name: '',
-            flagImage: null
-        }
     },
     watch: {
         languages(newVal, oldVal) {
@@ -44,23 +42,133 @@ new Vue({
         this.initializeWord();
 
         if (path === '/words/') {
-            this.fetchWords();
+            await this.fetchWords();
+
+            // Init Bootstrap data table
+            this.initDataTable()
+            this.updateDataTable()
         } else if (pathParts.length === 4 && pathParts[1] === 'words' && ['show', 'edit'].includes(pathParts[2])) {
             this.id = pathParts[3];
             this.fetchWordDetails();
+        } else if (pathParts.length === 3 && pathParts[1] === 'words' && ['language'].includes(pathParts[2])) {
+            this.fetchLanguageList() // for select input
         }
     },
     methods: {
+        async deleteLanguage(key) {
+            // Uncomment below to display warning popup
+            // const result = await Swal.fire({
+            //     icon: 'warning',
+            //     title: 'Are you sure?',
+            //     showDenyButton: true,
+            //     showCancelButton: true,
+            //     confirmButtonText: "Yes",
+            //     denyButtonText: 'No'
+            // })
+            // if (!result.isConfirmed) return
+
+            // Uncomment below to debug
+            console.log(key);
+
+            try {
+                const result = await axios.delete(this.domain + `./language`, { params: { key } })
+                this.languages = this.languages.filter(language => language.key !== key);
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Delete successfully'
+                })
+            } catch (error) {
+                console.error('Error deleting language:', error);
+                PopupError.fire({
+                    title: 'Error occurred while deleting language'
+                })
+            }
+        },
+        async fetchLanguageList() {
+            try {
+                const response = await axios.get(this.domain + './all-languages'); // unify url link                
+                this.languagesWithFlags = response.data
+                // this.errorMessage = ''
+                // console.log(response.data);
+
+            } catch (error) {
+                console.error('Error fetching all languages:', error);
+                // this.errorMessage = 'Error occurred while translating'
+                PopupError.fire({
+                    title: 'Error occurred while fetching all languages'
+                })
+            }
+        },
+        initDataTable() {
+            // Uncomment to use the old way to display data table
+            // this.dataTable = $('#example').DataTable();
+            // return
+
+            // Define data columns
+            let columns = []
+            for (const language of this.languages) {
+                columns.push({
+                    "data": language.key
+                })
+            }
+            columns.push({ "data": 'action' }) // contain action buttons
+            // console.log(columns);
+
+            // Disable alert warning when displaying data table
+            $.fn.dataTable.ext.errMode = 'none';
+
+            // Load data table
+            this.dataTable = $('#example').on('error.dt', function (e, settings, techNote, message) {
+                console.log('An error has been reported by DataTables: ', message);
+            }).DataTable({
+                "columns": columns
+            });
+        },
+        updateDataTable() {
+            // Uncomment to use the old way to display data table
+            // return 
+
+            // Add action buttons to data rows
+            let wordsWithButtons = []
+            this.words.forEach(word => {
+                wordsWithButtons.push({
+                    ...word,
+                    action: `
+                        <ul class="action-list">
+                            <li><a href="#" data-tip="show" onclick="app.showWord('${word._id}')"><i class="fa-solid fa-magnifying-glass"></i></a></li>
+                            <li><a href="#" data-tip="edit" onclick="app.editWord('${word._id}')"><i class="fa fa-edit"></i></a></li>
+                            <li><a href="#" data-tip="delete" onclick="app.destroyWord('${word._id}')"><i class="fa fa-trash"></i></a></li>
+                        </ul>
+                    `
+                })
+            })
+
+            // Refresh data table
+            this.dataTable = $('#example').DataTable();
+            this.dataTable.clear()
+            this.dataTable.rows.add(wordsWithButtons).draw()
+        },
         async translateAll() {
             const baseLanguage = 'english'; // Assuming the base language is English
             const baseWord = this.word[baseLanguage];
             if (!baseWord) {
-                this.errorMessage = 'Please enter a word in English to translate.';
+                // this.errorMessage = 'Please enter a word in English to translate.';
+                Popup.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: 'Please enter a word in English to translate.',
+                });
                 return;
             }
 
             try {
-                this.errorMessage = 'Translating...'
+                // System is loading...
+                // this.errorMessage = 'Translating...'
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Translating...'
+                })
+
                 const response = await axios.get(this.domain + './translate', {
                     params: { // in the form of: ?abc=xyz&...
                         baseWord,
@@ -68,12 +176,15 @@ new Vue({
                     }
                 }); // unify url link                
                 this.word = response.data
-                this.errorMessage = ''
+                // this.errorMessage = ''
                 // console.log(response.data);
-                
+
             } catch (error) {
                 console.error('Error translating words:', error);
-                this.errorMessage = 'Error occurred while translating'
+                // this.errorMessage = 'Error occurred while translating'
+                PopupError.fire({
+                    title: 'Error occurred while translating'
+                })
             }
         },
         handleFileUpload(event) {
@@ -86,44 +197,72 @@ new Vue({
             );
         },
         async addLanguage() {
-            console.log(this.newLanguage);
+            // console.log(this.newLanguage);
+
+            // if (!this.newLanguage.name || !this.newLanguage.flagImage) {
+            //     // this.errorMessage = "Please provide both the language name and it's flag image"
+            //     PopupError.fire({
+            //         title: "Please provide both the language name and it's flag image"
+            //     })
+            //     return;
+            // }
+
+            // const isOk = this.validImage()
+            // if (!isOk) return false
+
+            // const formData = new FormData();
+            // formData.append('name', this.toTitleCase(this.newLanguage.name.trim()));
+            // formData.append('key', this.newLanguage.name.trim().toLowerCase());
+            // formData.append('image', this.newLanguage.flagImage);
             
-            if (!this.newLanguage.name || !this.newLanguage.flagImage) {
-                this.errorMessage = "Please provide both the language name and it's flag image"
+            if (!this.selectedLanguage) {
+                PopupError.fire({
+                    title: "Language is not selected"
+                })
                 return;
             }
 
-            const isOk = this.validImage()
-            if (!isOk) return false
-
-            const formData = new FormData();
-            formData.append('name', this.toTitleCase(this.newLanguage.name.trim()));
-            formData.append('key', this.newLanguage.name.trim().toLowerCase());
-            formData.append('image', this.newLanguage.flagImage);
-
             try {
-                this.errorMessage = 'Loading...'
-                const response = await axios.post('./language', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                // this.errorMessage = 'Loading...'
+                // const response = await axios.post('./language', formData, {
+                //     headers: {
+                //         'Content-Type': 'multipart/form-data'
+                //     }
+                // });
+                // this.languages.push(response.data);
+                // this.errorMessage = ''
+                // this.newLanguage.name = '';
+                // this.newLanguage.key = '';
+                // this.newLanguage.flagImage = null;
+                // console.log(this.languages);
+                // console.log(response.data);
+
+                // Add new field
+                this.selectedLanguage.key = this.selectedLanguage.name.toLowerCase()
+                this.selectedLanguage.imageUrl = `https://flagcdn.com/${this.selectedLanguage.countryCode}.svg`
+                // Ask server to add new language
+                const response = await axios.post('./language', this.selectedLanguage)
                 this.languages.push(response.data);
                 this.errorMessage = ''
-                this.newLanguage.name = '';
-                this.newLanguage.key = '';
-                this.newLanguage.flagImage = null;
                 console.log(this.languages);
                 console.log(response.data);
-                
-                
+
+                // Notify success
+                Toast.fire({
+                    icon: 'success',
+                    title: 'Add language successfully'
+                })
+
             } catch (error) {
                 console.error('Error adding language:', error);
-                this.errorMessage = 'Error occurred while adding language'
+                // this.errorMessage = 'Error occurred while adding language'
+                PopupError.fire({
+                    title: 'Error occurred while adding language'
+                })
             }
         },
         validImage() {
-            let allowedExtension = ['image/jpeg', 'image/jpg', 'image/png','image/gif','image/bmp'];
+            let allowedExtension = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp'];
             let isValid = false;
             const flagImage = this.newLanguage.flagImage
 
@@ -150,6 +289,9 @@ new Vue({
                 console.log(response.data);
             } catch (error) {
                 console.error('Error fetching languages:', error);
+                PopupError.fire({
+                    title: 'Error fetching languages: ' + error
+                })
             }
         },
         initializeWord() {
@@ -183,13 +325,20 @@ new Vue({
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
+
+                        Toast.fire({
+                            icon: 'success',
+                            title: 'Export CSV successfully'
+                        })
                     };
 
                     reader.readAsText(response.data);
 
                 })
                 .catch(error => {
-                    alert('Error exporting CSV!')
+                    PopupError.fire({
+                        title: 'Error exporting CSV!'
+                    })
                     console.error('Error exporting CSV:', error.message);
                 });
         },
@@ -212,35 +361,62 @@ new Vue({
                     break;
             }
 
-
             this.fetchWords()
         },
         searchWords() {
             this.currentPage = 1 // reset page to display
             this.fetchWords()
         },
-        fetchWords() {
-            axios.get('./list', {
-                params: { // in the form of: ?abc=xyz&...
-                    page: this.currentPage,
-                    pageSize: this.pageSize,
-                    sortKey: this.sortKey,
-                    isAscending: this.isAscending,
-                    searchQuery: this.searchQuery, // Pass search query to the backend
-                    searchLanguage: this.searchLanguage, // Pass search language to the backend
-                }
-            })
-                .then(response => {
-                    // Handle successful response
-                    const { data } = response.data
-                    console.log(data);
-                    this.words = data.words
-                    this.totalPages = data.totalPages
+        // fetchWords() {
+        //     axios.get('./list', {
+        //         params: { // in the form of: ?abc=xyz&...
+        //             page: this.currentPage,
+        //             pageSize: this.pageSize,
+        //             sortKey: this.sortKey,
+        //             isAscending: this.isAscending,
+        //             searchQuery: this.searchQuery, // Pass search query to the backend
+        //             searchLanguage: this.searchLanguage, // Pass search language to the backend
+        //         }
+        //     })
+        //         .then(response => {
+        //             // Handle successful response
+        //             const { data } = response.data
+        //             console.log(data);
+        //             this.words = data.words
+        //             this.totalPages = data.totalPages
+        //         })
+        //         .catch(error => {
+        //             // Handle error
+        //             console.log(error.message);
+        //         })
+        // },
+        // Update function with async/await
+        async fetchWords() {
+            try {
+                const response = await axios.get('./list', {
+                    params: {
+                        // Uncomment to allow pagination and sorting in backend
+                        // page: this.currentPage,
+                        // pageSize: this.pageSize,
+                        // sortKey: this.sortKey,
+                        // isAscending: this.isAscending,
+                        searchQuery: this.searchQuery,
+                        searchLanguage: this.searchLanguage,
+                    }
+                });
+
+                // Handle successful response
+                const { data } = response.data;
+                console.log(data);
+                this.words = data.words;
+                this.totalPages = data.totalPages;
+            } catch (error) {
+                // Handle error
+                console.error(error.message);
+                PopupError.fire({
+                    title: 'Error occurred while fetching words'
                 })
-                .catch(error => {
-                    // Handle error
-                    console.log(error.message);
-                })
+            }
         },
         changePage(pageNumber) {
             if (pageNumber >= 1 && pageNumber <= this.totalPages) {
@@ -264,6 +440,9 @@ new Vue({
                 .catch(error => {
                     // Handle error
                     console.log(error.message);
+                    PopupError.fire({
+                        title: 'Error occurred while fetching word details'
+                    })
                 })
         },
         showWord(id) {
@@ -274,21 +453,36 @@ new Vue({
             // alert('Edit clicked for word with ID ' + id);
             window.location.href = './edit/' + id
         },
-        destroyWord(id) {
-            const ok = confirm('Are you sure?');
-            if (!ok) return
+        async destroyWord(id) {
+            // const ok = confirm('Are you sure?');
+            const result = await Swal.fire({
+                icon: 'warning',
+                title: 'Are you sure?',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: "Yes",
+                denyButtonText: 'No'
+            })
+            if (!result.isConfirmed) return
 
             axios.delete('./delete/' + id)
                 .then(response => {
                     console.log(response.data);
 
                     // Success insertion
-                    // alert('Delete words successfully!');
                     this.words = this.words.filter(word => word._id !== id) // Remove deleted words
+                    Toast.fire({
+                        icon: 'success',
+                        title: 'Delete successfully'
+                    })
+                    this.updateDataTable()
                 })
                 .catch(error => {
                     // Handle error
                     console.log(error.response.data);
+                    PopupError.fire({
+                        title: 'Error occurred while deleting words'
+                    })
                 })
         },
         updateWord() {
@@ -297,7 +491,10 @@ new Vue({
             // console.log(this.word);
             const missingFields = this.languages.filter(language => !this.word[language.key])
             if (missingFields.length > 0) {
-                this.errorMessage = 'All fields are required!';
+                // this.errorMessage = 'All fields are required!';
+                PopupError.fire({
+                    title: 'All fields are required!'
+                })
                 return;
             }
 
@@ -308,7 +505,7 @@ new Vue({
                 if (typeof value === 'string') {
                     this.word[key] = value.trim();
                 } else {
-                    console.log(`Unexpected type for key ${key}:`, value);
+                    console.error(`Unexpected type for key ${key}:`, value);
                 }
             }
             axios.put('../update/' + this.id, this.word) //{ // Uncomment below and comment this.word) to use static data
@@ -321,13 +518,22 @@ new Vue({
                     console.log(response.data);
 
                     // Success insertion
-                    alert('Update words successfully!');
-                    window.location.href = '../';
+                    // alert('Update words successfully!');
+                    Popup.fire({
+                        icon: 'success',
+                        title: 'Update successfully!'
+                    }).then((result) => {
+                        // After the pop up is closed
+                        window.location.href = '../';
+                    })
                 })
                 .catch(error => {
                     // Handle error
                     console.log(error.response.data);
-                    this.errorMessage = error.response.data || 'Error occurred while updating words!';
+                    // this.errorMessage = error.response.data || 'Error occurred while updating words!';
+                    PopupError.fire({
+                        title: error.response.data || 'Error occurred while updating words!'
+                    })
                 });
         },
         addNewWord() {
@@ -336,7 +542,10 @@ new Vue({
             // console.log(this.word);
             const missingFields = this.languages.filter(language => !this.word[language.key])
             if (missingFields.length > 0) {
-                this.errorMessage = 'All fields are required!';
+                // this.errorMessage = 'All fields are required!';
+                PopupError.fire({
+                    title: 'All fields are required!'
+                })
                 return;
             }
 
@@ -351,13 +560,22 @@ new Vue({
                     console.log(response.data);
 
                     // Success insertion
-                    alert('Add new words successfully!');
-                    window.location.href = './';
+                    // alert('Add new words successfully!');
+                    Popup.fire({
+                        icon: 'success',
+                        title: 'Add words successfully!'
+                    }).then((result) => {
+                        // After the pop up is closed
+                        window.location.href = './';
+                    })
                 })
                 .catch(error => {
                     // Handle error
                     console.log(error.response.data);
-                    this.errorMessage = error.response.data || 'Error occurred while adding words!';
+                    // this.errorMessage = error.response.data || 'Error occurred while adding words!';
+                    PopupError.fire({
+                        title: error.response.data || 'Error occurred while adding words!'
+                    })
                 });
         },
         onFileChange(event) {
@@ -367,7 +585,10 @@ new Vue({
         },
         async addNewWordCSV() {
             if (!this.csv) {
-                this.errorMessage = "CSV file isn't uploaded!";
+                // this.errorMessage = "CSV file isn't uploaded!";
+                PopupError.fire({
+                    title: "CSV file isn't uploaded!"
+                })
                 return;
             }
 
@@ -390,20 +611,37 @@ new Vue({
                 // Handle successful response
                 const data = response.data;
                 console.log(data);
-                alert('Add new words successfully!');
+                // alert('Add new words successfully!');
                 this.errorMessage = '';
-                window.location.href = './';
+
+                Popup.fire({
+                    icon: 'success',
+                    title: 'Add words successfully!'
+                }).then((result) => {
+                    // After the pop up is closed
+                    window.location.href = './';
+                })
             } catch (error) {
                 // Handle error response
                 if (error.response && error.response.data) {
                     const errorData = error.response.data;
                     if (errorData.failedWords) {
                         this.errorMessage = 'Some words failed to save:\n' + errorData.failedWords.map(fw => `Row: ${JSON.stringify(fw.row)}, Error: ${fw.error}`).join('\n');
+
+                        PopupError.fire({
+                            title: this.errorMessage
+                        })
                     } else if (errorData.error) {
-                        this.errorMessage = errorData.error;
+                        // this.errorMessage = errorData.error;
+                        PopupError.fire({
+                            title: errorData.error
+                        })
                     }
                 } else {
-                    this.errorMessage = 'An error occurred while processing the request.';
+                    // this.errorMessage = 'An error occurred while processing the request.';
+                    PopupError.fire({
+                        title: 'An error occurred while processing the request.'
+                    })
                 }
                 console.log(error);
             }
@@ -415,7 +653,10 @@ new Vue({
                 // Validate file type
                 const allowedTypes = ['text/csv'];
                 if (!allowedTypes.includes(this.csv.type)) {
-                    this.errorMessage = 'Please upload a valid CSV file.';
+                    // this.errorMessage = 'Please upload a valid CSV file.';
+                    PopupError.fire({
+                        title: 'Please upload a valid CSV file.'
+                    })
                     resolve(isValid);
                     return;
                 }
@@ -423,7 +664,10 @@ new Vue({
                 // Validate file size (e.g., limit to 5MB)
                 const maxSize = 5 * 1024 * 1024;
                 if (this.csv.size > maxSize) {
-                    this.errorMessage = `File size should not exceed ${maxSize / (1024 * 1024)}MB.`;
+                    // this.errorMessage = `File size should not exceed ${maxSize / (1024 * 1024)}MB.`;
+                    PopupError.fire({
+                        title: `File size should not exceed ${maxSize / (1024 * 1024)}MB.`
+                    })
                     resolve(isValid);
                     return;
                 }
@@ -434,8 +678,14 @@ new Vue({
                     const rows = reader.result.trim().split(/\r\n|\n|\r|\t/);
                     const colnames = rows[0].split(',');
                     const requiredLanguages = this.languages.map(language => language.name)
-                    if (JSON.stringify(colnames) !== JSON.stringify(requiredLanguages)) {
+
+                    const requiredLanguagesNotIncluded = requiredLanguages.filter(name => !colnames.includes(name))
+                    console.log(requiredLanguagesNotIncluded);
+                    if (requiredLanguagesNotIncluded.length) {
                         this.errorMessage = 'Column names are incorrect. They must be respectively: ' + requiredLanguages.join(', ');
+                        PopupError.fire({
+                            title: 'Column names are incorrect. They must be respectively: ' + requiredLanguages.join(', ')
+                        })
                         resolve(isValid);
                         return;
                     }
@@ -457,7 +707,10 @@ new Vue({
 
                 // Handle file read errors
                 reader.onerror = () => {
-                    this.errorMessage = 'Error reading file.';
+                    // this.errorMessage = 'Error reading file.';
+                    PopupError.fire({
+                        title: 'Error reading file.'
+                    })
                     reject(isValid);
                 };
 

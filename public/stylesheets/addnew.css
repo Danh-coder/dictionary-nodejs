@@ -55,7 +55,7 @@ h2 {
 }
 
 .form-group input {
-    width: 65%;
+    /* width: 65%; */
     padding: 0.5rem;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -108,7 +108,7 @@ a {
     margin: auto;
 }
 
-.language-list {
+/* .language-list {
     list-style-type: none;
     padding: 0;
     display: flex;
@@ -141,4 +141,35 @@ a {
     height: 30px;
     margin-right: 10px;
     border-radius: 4px;
+} */
+
+/* ------------- New styles --------------- */
+.form-container {
+    max-width: 1200px;
+    margin: 20px auto;
+}
+.form-header {
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+.form-group img {
+    width: 30px;
+    margin-right: 10px;
+}
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+}
+.file-upload {
+    display: flex;
+    align-items: center;
+}
+.form-column {
+    padding: 20px;
+    border: 1px solid #eaeaea;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+.form-info {
+    margin-bottom: 20px;
 }

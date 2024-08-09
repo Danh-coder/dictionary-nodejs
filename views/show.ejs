@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Details</title>
-    <link rel="stylesheet" href="/stylesheets/addnew.css">
     <link rel="stylesheet" href="/stylesheets/navbar.css">
+    <link rel="stylesheet" href="/stylesheets/show.css">
     <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
 </head>
 
@@ -23,7 +23,8 @@
         </div> -->
 
         <!-- Body content here -->
-        <div class="form-container">
+        <!-- Old way -->
+        <!-- <div class="form-container">
             <h2>Show Word</h2>
             <form id="new-word-form">
                 <div class="form-group" v-for="language in languages">
@@ -33,36 +34,23 @@
                     <input type="text" :id="language.key + '-word'" :name="language.key + '-word'" v-model="word[language.key]"
                         :placeholder="language.name + ' word'" disabled>
                 </div>
-                <!-- <div class="form-group">
-                    <label for="english-word">
-                        <img src="/images/english.png" alt="English"> English
-                    </label>
-                    <input type="text" id="english-word" name="english-word" v-model="english"
-                        placeholder="English word" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="german-word">
-                        <img src="/images/german.png" alt="German"> German
-                    </label>
-                    <input type="text" id="german-word" name="german-word" v-model="german"
-                        placeholder="German word" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="french-word">
-                        <img src="/images/french.png" alt="French"> French
-                    </label>
-                    <input type="text" id="french-word" name="french-word" v-model="french"
-                        placeholder="French word" disabled>
-                </div>
-                <div class="form-group">
-                    <label for="vietnamese-word">
-                        <img src="/images/vietnamese.png" alt="Vietnamese"> Vietnamese
-                    </label>
-                    <input type="text" id="vietnamese-word" name="vietnamese-word" v-model="vietnamese"
-                        placeholder="Vietnamese word" disabled>
-                </div> -->
                 <a :href="'../edit/' + this.id">Edit word</a>
             </form>
+        </div> -->
+
+        <div class="table-container">
+            <h2 class="text-center">Show Word</h2>
+            <table>
+                <tr>
+                    <th>Language</th>
+                    <th>Translation</th>
+                </tr>
+                <tr v-for="language in languages">
+                    <td><img :src="language.imageUrl" :alt="language.name"> {{language.name}}</td>
+                    <td>{{word[language.key]}}</td>
+                </tr>
+            </table>
+            <a :href="'../edit/' + this.id" class="edit-link">Edit word</a>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>

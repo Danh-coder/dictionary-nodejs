@@ -6,6 +6,7 @@ const { Parser } = require('json2csv');
 const upload = require('../utils/multer')
 const Constant = require('../common/constant')
 // const languages = require('../config/languages.json') // Load languages from JSON file
+const languagesFlags = require('../config/languages-flag.json')
 const Language = require('../models/Language');
 const Word = require('../models/Word');
 const Gemini = require('../utils/gemini')
@@ -13,6 +14,11 @@ const Gemini = require('../utils/gemini')
 router.get('/', function (req, res, next) {
   res.render('words')
 });
+
+/* GET all languages and their relevant country flags */
+router.get('/all-languages', (req, res, next) => {
+  res.json(languagesFlags)
+})
 
 /* GET words translated */
 router.get('/translate', async (req, res) => {
@@ -54,6 +60,22 @@ router.get('/languages', async (req, res) => {
   }
 });
 
+/* DELETE language */
+router.delete('/language', async (req, res, next) => {
+  try {
+    const conditions = req.query
+    // Uncomment below to debug
+    console.log(conditions);
+
+    const language = new Language()
+    const result = await language.delete(conditions)
+    res.status(200).json(result)
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error occurred while deleting language');
+  }
+})
+
 /* GET add word form */
 router.get('/new', function (req, res, next) {
   res.render('addnew')
@@ -65,15 +87,36 @@ router.get('/language', function (req, res, next) {
 });
 
 /* POST add language to database */
-router.post('/language', upload.single('image'), async (req, res, next) => {
+// router.post('/language', upload.single('image'), async (req, res, next) => {
+//   const { name, key } = req.body
+//   const imageUrl = req.file ? `/images/uploads/${req.file.filename}` : ''
+//   if (!name || !key) {
+//     return res.status(400).send('Language name and key are required');
+//   }
+
+//   try {
+//     const newLanguage = { name, key, imageUrl };
+//     // Uncomment below to debug
+//     // console.log(newLanguage);
+//     const language = new Language()
+//     const result = await language.create(newLanguage)
+//     res.status(201).json(result);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Error occurred when adding data.');
+//   }
+
+// })
+
+/* POST add language to database */
+router.post('/language', async (req, res, next) => {
   const { name, key } = req.body
-  const imageUrl = req.file ? `/images/uploads/${req.file.filename}` : ''
   if (!name || !key) {
     return res.status(400).send('Language name and key are required');
   }
 
   try {
-    const newLanguage = { name, key, imageUrl };
+    const newLanguage = req.body;
     // Uncomment below to debug
     // console.log(newLanguage);
     const language = new Language()
@@ -116,15 +159,17 @@ router.get('/list', async function (req, res, next) {
 
     // Set pagination
     let paging = {}
-    paging = { limit, skip: (page - 1) * limit }
+    // Uncomment below to allow pagination
+    // paging = { limit, skip: (page - 1) * limit }
 
     // Set sorting
     let sort = {}
-    if (req.query.sortKey && req.query.isAscending !== undefined) {
-      sort = {
-        [req.query.sortKey]: (req.query.isAscending === 'true' ? 1 : -1)
-      }
-    }
+    // Uncomment below to allow sorting
+    // if (req.query.sortKey && req.query.isAscending !== undefined) {
+    //   sort = {
+    //     [req.query.sortKey]: (req.query.isAscending === 'true' ? 1 : -1)
+    //   }
+    // }
     // Uncomment below to debug
     // console.log(req.query.isAscending);
     // console.log(sort);
@@ -145,27 +190,37 @@ router.get('/list', async function (req, res, next) {
   }
 })
 
+async function isUniqueWord(body) {
+  const word = new Word();
+  const query = {};
+  // Uncomment below to debug
+  console.log('Body', body);  
+
+  // Construct regex-based query to check for uniqueness
+  for (const key in body) {
+    if (body.hasOwnProperty(key) && !(['_id', '__v'].includes(key))) {
+      query[key] = new RegExp(`^${body[key]}$`, 'i'); // Case-insensitive match
+    }
+  }
+  // Uncomment below to debug
+  console.log('Query', query);    
+
+  const existingWord = await word.search_by_condition(query)
+  // Uncomment below to debug
+  console.log('ExistingWord', existingWord);
+
+  return (!existingWord.length)
+}
+
 /* POST add new word */
 router.post('/addnew', async (req, res, next) => {
   try {
     const word = new Word();
     const { body } = req;
-    const query = {};
 
-    // Construct regex-based query to check for uniqueness
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        query[key] = new RegExp(`^${body[key]}$`, 'i'); // Case-insensitive match
-      }
-    }
-    // Uncomment below to debug
-    // console.log(query);    
-
-    const existingWord = await word.search_by_condition(query)
-    // Uncomment below to debug
-    // console.log(existingWord);
-
-    if (existingWord.length) {
+    // Check for data uniqueness
+    const unique = await isUniqueWord(body)
+    if (!unique) {
       return res.status(400).send('Word already exists.');
     }
     const result = await word.create(body);
@@ -186,7 +241,7 @@ router.post('/csvimport', upload.single('csv'), async (req, res, next) => {
   const languages = await language.search_by_condition()
   // console.log(languages);    
 
-  const words = [];
+  const wordsToAdd = [];
   // const requiredHeaders = ['English', 'German', 'French', 'Vietnamese'];
   const requiredHeaders = languages.map(language => language.name)
   let headersValidated = false;
@@ -214,7 +269,7 @@ router.post('/csvimport', upload.single('csv'), async (req, res, next) => {
             error: 'Missing required data in CSV'
           });
         } else {
-          words.push(row);
+          wordsToAdd.push(row);
         }
       }
     })
@@ -224,7 +279,7 @@ router.post('/csvimport', upload.single('csv'), async (req, res, next) => {
         fs.unlinkSync(csvFilePath); // Remove the file after processing
 
         const word = new Word();
-        for (const row of words) {
+        for (const row of wordsToAdd) {
           try {
             // Dynamically construct the object to be created
             let wordData = {};
@@ -232,13 +287,15 @@ router.post('/csvimport', upload.single('csv'), async (req, res, next) => {
               wordData[language.key] = row[language.name];
             });
 
+            const unique = await isUniqueWord(wordData)
+            if (!unique) throw Error('Words already exist')
             await word.create(wordData, function (results) {
 
             });
           } catch (error) {
             failedWords.push({
               row,
-              error: 'Failed to save to database'
+              error: error.message
             });
           }
         }
@@ -358,22 +415,11 @@ router.put('/update/:id', async (req, res, next) => {
   const { body } = req
   try {
     const word = new Word()
-    const query = {};
-
-    // Construct regex-based query to check for uniqueness
-    for (const key in body) {
-      if (body.hasOwnProperty(key)) {
-        query[key] = new RegExp(`^${body[key]}$`, 'i'); // Case-insensitive match
-      }
-    }
-    // Uncomment below to debug
-    // console.log(query);    
-
-    const existingWord = await word.search_by_condition(query)
-    // Uncomment below to debug
-    // console.log(existingWord);
-
-    if (existingWord.length) {
+    
+    // Check for data uniqueness
+    const unique = await isUniqueWord(body)
+    // console.log(unique);    
+    if (!unique) {
       return res.status(400).send('Word already exists.');
     }
 

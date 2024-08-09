@@ -5,9 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Words Table</title>
+    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+
+    <!-- Local stylesheets -->
     <link rel="stylesheet" href="/stylesheets/styles.css">
     <link rel="stylesheet" href="/stylesheets/navbar.css">
-    <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
+    <!-- <link rel="stylesheet" href="/stylesheets/table.css"> -->
 </head>
 
 <body>
@@ -22,10 +29,10 @@
             </ul>
         </div> -->
 
-        <div class="container">
+        <!-- <div class="container">
             <h1>Matt week 12 - Words</h1>
 
-            <!-- Search Bar, Dropdown, Search Button, and Export Button -->
+            Search Bar, Dropdown, Search Button, and Export Button
             <div class="search-container">
                 <input type="text" v-model="searchQuery" placeholder="Search..." class="search-bar">
                 <select v-model="searchLanguage" class="search-dropdown">
@@ -47,47 +54,13 @@
                                     v-show="isAscending !== null && sortKey === language.key"></i>
                             </div>
                         </th>
-                        <!-- <th>
-                            <div class="sort-button" @click="sortWords('english')">
-                                English
-                                <i :class="['fas', 'fa-arrow-up', 'sort-arrow', { desc: !isAscending }]"
-                                    v-show="isAscending !== null && sortKey === 'english'"></i>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="sort-button" @click="sortWords('german')">
-                                German
-                                <i :class="['fas', 'fa-arrow-up', 'sort-arrow', { desc: !isAscending }]"
-                                    v-show="isAscending !== null && sortKey === 'german'"></i>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="sort-button" @click="sortWords('french')">
-                                French
-                                <i :class="['fas', 'fa-arrow-up', 'sort-arrow', { desc: !isAscending }]"
-                                    v-show="isAscending !== null && sortKey === 'french'"></i>
-                            </div>
-                        </th>
-                        <th>
-                            <div class="sort-button" @click="sortWords('vietnamese')">
-                                Vietnamese
-                                <i :class="['fas', 'fa-arrow-up', 'sort-arrow', { desc: !isAscending }]"
-                                    v-show="isAscending !== null && sortKey === 'vietnamese'"></i>
-                            </div>
-                        </th> -->
-                        <!-- <th>German</th>
-                        <th>French</th>
-                        <th>Vietnamese</th> -->
+                        
                         <th colspan="3"></th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="word in words" :key="word._id">
                         <td v-for="language in languages">{{ word[language.key] }}</td>
-                        <!-- <td>{{ word.english }}</td>
-                        <td>{{ word.german }}</td>
-                        <td>{{ word.french }}</td>
-                        <td>{{ word.vietnamese }}</td> -->
                         <td style="width: 1px;">
                             <a href="#" class="show" @click.prevent="showWord(word._id)">Show</a>
                         </td>
@@ -106,11 +79,70 @@
                     :class="{ active: currentPage === page }">{{ page }}</button>
                 <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Next</button>
             </div>
+        </div> -->
+
+        <div class="row py-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card rounded shadow border-0">
+                    <div class="card-body p-5 bg-white rounded">
+                        <div class="header-container">
+                            <h1>Matt week 12 - Words</h1>
+                            <button @click="exportCSV" class="export-button">Export all words to CSV</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="example" style="width:100%" class="table table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <!-- <th>Name</th>
+                                        <th>Position</th>
+                                        <th>Office</th>
+                                        <th>Age</th>
+                                        <th>Start date</th>
+                                        <th>Salary</th> -->
+                                        <th v-for="language in languages">{{language.name}}</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- <tr>
+                                        <td>Tiger Nixon</td>
+                                        <td>System Architect</td>
+                                        <td>Edinburgh</td>
+                                        <td>61</td>
+                                        <td>2011/04/25</td>
+                                        <td>$320,800</td>
+                                    </tr> -->
+
+                                    <!-- Uncomment to use the old way to display data table -->
+                                    <!-- <tr v-for="word in words" :key="word._id">
+                                        <td v-for="language in languages">{{ word[language.key] }}</td>
+                                        <td>
+                                            <ul class="action-list">
+                                                <li><a href="#" data-tip="show" @click.prevent="showWord(word._id)"><i class="fa-solid fa-magnifying-glass"></i></a></li>
+                                                <li><a href="#" data-tip="edit" @click.prevent="editWord(word._id)"><i class="fa fa-edit"></i></a></li>
+                                                <li><a href="#" data-tip="delete" @click.prevent="destroyWord(word._id)"><i class="fa fa-trash"></i></a></li>
+                                            </ul>
+                                        </td>
+                                    </tr> -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src="/javascripts/navbar.js"></script>
+    <script src="/javascripts/alert.js"></script>
     <script src="/javascripts/script.js"></script>
 </body>
 

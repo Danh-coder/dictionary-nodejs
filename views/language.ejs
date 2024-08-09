@@ -1,19 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Language</title>
-    <link rel="stylesheet" href="/stylesheets/addnew.css">
+    <link rel="stylesheet" href="/stylesheets/language.css">
     <link rel="stylesheet" href="/stylesheets/navbar.css">
     <script src="https://kit.fontawesome.com/49b0e75428.js" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div id="app">
         <navbar current-page="add-language"></navbar>
 
         <!-- Body content here -->
-        <div class="form-container">
+        <!-- Old way -->
+        <!-- <div class="form-container">
             <h2>Add a New Language</h2>
             <p class="error-message">{{errorMessage}}</p>
             <form class="" @submit.prevent="addLanguage">
@@ -36,12 +39,52 @@
                     <img :src="language.imageUrl" :alt="language.name"> {{language.name}}
                 </li>
             </ul>
-        </div>
-    </div>
+        </div> -->
 
-    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="/javascripts/navbar.js"></script>
-    <script src="/javascripts/script.js"></script>
+        <div class="container">
+            <h2>Add a New Language</h2>
+            <div class="form-group">
+                <select v-model="selectedLanguage">
+                    <option v-for="language in languagesWithFlags" :key="language.code" :value="language">
+                        {{ language.name }}
+                    </option>
+                </select>
+                <button class="btn btn-success" @click="addLanguage">Add</button>
+                <!-- <button type="submit" class="btn-submit" @click.prevent="addLanguage">Submit</button> -->
+            </div>
+
+            <!-- <h2>Current Languages</h2>
+            <ul class="language-list">
+                <li v-for="language in languages" :key="language.key">
+                    <img :src="language.imageUrl" :alt="language.name"> {{language.name}}
+                </li>
+            </ul> -->
+            <h2>Current Languages</h2>
+            <ul class="language-list">
+                <li v-for="language in languages" :key="language.key">
+                    <div class="language-info">
+                        <img :src="language.imageUrl" :alt="language.name">
+                        {{ language.name }}
+                    </div>
+                    <button @click="deleteLanguage(language.key)" class="btn-delete" v-show="language.key !== 'english'">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+        <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <script src="/javascripts/navbar.js"></script>
+        <script src="/javascripts/alert.js"></script>
+        <script src="/javascripts/script.js"></script>
 </body>
+
 </html>

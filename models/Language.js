@@ -18,10 +18,10 @@ const languageSchema = new Schema({
     name: { type: String, required: true, unique: true },
     key: { type: String, required: true, unique: true },
     imageUrl: { type: String, required: true }
-})
+}, { strict: false })
 
-const Language = mongoose.model("languages", // "words" is the collection name
-    languageSchema
+const Language = mongoose.model("languages", // "languages" is the collection name
+    languageSchema,
 )
 
 Language.prototype.create = function (data) {
@@ -108,24 +108,24 @@ Language.prototype.search_by_condition = async function (
 //     });
 // };
 
-// Word.prototype.delete = function (conditions) {
-//     return new Promise(async (resolve, reject) => {
-//         try {
-//             const result = await Word.deleteOne(conditions)
-//             // console.log(result) // Uncomment to see the query result
-//             const resp = { result: Constant.OK_CODE, };
-//             resolve(resp);
-//         } catch (error) {
-//             const resp = {
-//                 result: Constant.FAILED_CODE,
-//                 message: Constant.SERVER_ERR,
-//                 err: error
-//             };
-//             console.error(error);
-//             reject(resp);
-//         }
-//     });
-// };
+Language.prototype.delete = function (conditions) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const result = await Language.deleteOne(conditions)
+            // console.log(result) // Uncomment to see the query result
+            const resp = { result: Constant.OK_CODE, };
+            resolve(resp);
+        } catch (error) {
+            const resp = {
+                result: Constant.FAILED_CODE,
+                message: Constant.SERVER_ERR,
+                err: error
+            };
+            console.error(error);
+            reject(resp);
+        }
+    });
+};
 
 // make this available to our users in our Node applications
 module.exports = Language

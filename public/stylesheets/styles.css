@@ -10,15 +10,24 @@ body {
 .container {
   margin: auto;
   padding: 20px;
-  width: 800px;
+  /* width: 800px; */
   /* background-color: white; */
   border-radius: 8px;
   /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); */
 }
 
-h1 {
-  font-size: 24px;
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
+}
+
+h1 {
+  /* font-size: 24px; */
+  /* margin-bottom: 20px; */
+  display: inline-block;
+  font-weight: bold;
 }
 
 table {
@@ -126,7 +135,8 @@ a {
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s;
-  margin-right: 10px; /* Add margin to the right for spacing */
+  margin-right: 10px;
+  /* Add margin to the right for spacing */
 }
 
 /* Styling the export button */
@@ -141,10 +151,23 @@ a {
 }
 
 /* Change background color on hover */
-.search-button:hover{
+.search-button:hover {
   background-color: #0056b3;
 }
 
 .export-button:hover {
   background-color: #45a049;
+}
+
+.action-list {
+  list-style-type: none;
+  padding: 0;
+  /* Remove padding */
+  margin: 0;
+  /* Remove margins */
+}
+
+.action-list li {
+  display: inline-block;
+  padding: 2px;
 }
